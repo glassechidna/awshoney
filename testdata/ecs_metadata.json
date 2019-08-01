@@ -1,0 +1,54 @@
+{
+  "Cluster": "default",
+  "TaskARN": "arn:aws:ecs:us-east-1:01234567890:task/default/3f3b08db6c984e0f98f05e5d3af242c3",
+  "Family": "worker",
+  "Revision": "4",
+  "DesiredStatus": "RUNNING",
+  "KnownStatus": "RUNNING",
+  "Containers": [
+    {
+      "DockerId": "ce838e4b9bb364e349ea48ec233202d21d48ffd015d5ae690b95188f9de40a69",
+      "Name": "app",
+      "DockerName": "ecs-worker-4-app-eecebea396c39fdbd401",
+      "Image": "01234567890.dkr.ecr.us-east-1.amazonaws.com/diffy/worker:7221f64d8d50f8b5557cda1d5a6e496f947ecbee",
+      "ImageID": "sha256:5549c1b7cb315440cf2803cf79e5c681201cc84dafea3f3c0706ebab000e8a15",
+      "Labels": {
+        "com.amazonaws.ecs.cluster": "default",
+        "com.amazonaws.ecs.container-name": "app",
+        "com.amazonaws.ecs.task-arn": "arn:aws:ecs:us-east-1:01234567890:task/default/3f3b08db6c984e0f98f05e5d3af242c3",
+        "com.amazonaws.ecs.task-definition-family": "worker",
+        "com.amazonaws.ecs.task-definition-version": "4"
+      },
+      "DesiredStatus": "RUNNING",
+      "KnownStatus": "RUNNING",
+      "Limits": {
+        "CPU": 0,
+        "Memory": 0
+      },
+      "CreatedAt": "2019-07-29T21:26:24.003266497Z",
+      "StartedAt": "2019-07-29T21:26:24.403596605Z",
+      "Type": "NORMAL",
+      "Networks": [
+        {
+          "NetworkMode": "bridge",
+          "IPv4Addresses": [
+            "172.17.0.5"
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Source": "/var/run/docker.sock",
+          "Destination": "/var/run/docker.sock"
+        },
+        {
+          "Source": "/tmp",
+          "Destination": "/tmp"
+        }
+      ]
+    }
+  ],
+  "PullStartedAt": "2019-07-29T21:26:23.233333505Z",
+  "PullStoppedAt": "2019-07-29T21:26:23.995384183Z",
+  "AvailabilityZone": "us-east-1c"
+}
