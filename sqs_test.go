@@ -19,7 +19,7 @@ func TestSqs_SendMessageWithContext(t *testing.T) {
 	m := &mockSqs{}
 	m.On("SendMessageWithContext", mock.Anything, &sqs.SendMessageInput{
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"X-Honeycomb-Trace": {
+			propagation.TracePropagationHTTPHeader: {
 				DataType:    aws.String("String"),
 				StringValue: aws.String(span.SerializeHeaders()),
 			},
@@ -40,7 +40,7 @@ func TestSqs_SendMessageBatchWithContext(t *testing.T) {
 		Entries: []*sqs.SendMessageBatchRequestEntry{
 			{
 				MessageAttributes: map[string]*sqs.MessageAttributeValue{
-					"X-Honeycomb-Trace": {
+					propagation.TracePropagationHTTPHeader: {
 						DataType:    aws.String("String"),
 						StringValue: aws.String(span.SerializeHeaders()),
 					},
@@ -72,7 +72,7 @@ func TestInsertTraceSqsAttribute(t *testing.T) {
 		InsertTraceSqsAttribute(ctx, &msg.MessageAttributes)
 		assert.Equal(t, &sqs.SendMessageInput{
 			MessageAttributes: map[string]*sqs.MessageAttributeValue{
-				"X-Honeycomb-Trace": {
+				propagation.TracePropagationHTTPHeader: {
 					DataType:    aws.String("String"),
 					StringValue: aws.String(span.SerializeHeaders()),
 				},
@@ -94,7 +94,7 @@ func TestInsertTraceSqsAttribute(t *testing.T) {
 		InsertTraceSqsAttribute(ctx, &msg.MessageAttributes)
 		assert.Equal(t, &sqs.SendMessageInput{
 			MessageAttributes: map[string]*sqs.MessageAttributeValue{
-				"X-Honeycomb-Trace": {
+				propagation.TracePropagationHTTPHeader: {
 					DataType:    aws.String("String"),
 					StringValue: aws.String(span.SerializeHeaders()),
 				},
@@ -142,7 +142,7 @@ func TestStartSpanFromSqs(t *testing.T) {
 					{
 						MessageId: aws.String("msg-id"),
 						MessageAttributes: map[string]*sqs.MessageAttributeValue{
-							"X-Honeycomb-Trace": {
+							propagation.TracePropagationHTTPHeader: {
 								DataType:    aws.String("String"),
 								StringValue: aws.String(span.SerializeHeaders()),
 							},
