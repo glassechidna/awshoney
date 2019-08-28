@@ -10,7 +10,7 @@ require (
 	github.com/facebookgo/muster v0.0.0-20150708232844-fd3d7953fd52 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/honeycombio/beeline-go v0.4.4
-	github.com/honeycombio/libhoney-go v1.11.1 // indirect
+	github.com/honeycombio/libhoney-go v1.11.1
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.3.0
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect

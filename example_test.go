@@ -9,17 +9,9 @@ func ExampleUsage() {
 	beeline.Init(beeline.Config{
 		WriteKey:    "yourkey",
 		Dataset:     "yourdataset",
-		PresendHook: awshoney.PresendHook,
 	})
 
-	// alternatively, if you have other presend hooks:
-	beeline.Init(beeline.Config{
-		WriteKey: "yourkey",
-		Dataset:  "yourdataset",
-		PresendHook: awshoney.ComposePresendHooks(awshoney.PresendHook, func(m map[string]interface{}) {
-			// ...
-		}),
-	})
+	awshoney.AddFieldsToClient(nil)
 
 	/*
 		Traces inside AWS Lambda functions have the following fields added:

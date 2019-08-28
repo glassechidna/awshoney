@@ -1,6 +1,8 @@
 package awshoney
 
 import (
+	"github.com/honeycombio/beeline-go/client"
+	"github.com/honeycombio/libhoney-go"
 	"net/http"
 	"os"
 	"strings"
@@ -9,6 +11,17 @@ import (
 
 const execEnvEcs = "AWS_ECS_"
 const execEnvLambda = "AWS_Lambda_"
+
+// Adds aws.* fields to all traces and spans recorded by c. If c is nil,
+// the default client will be used. Usually you will invoke this right after
+// beeline.Init()
+func AddFieldsToClient(c *libhoney.Client) {
+	if c == nil {
+		c = client.Get()
+	}
+
+	c.Add(Map())
+}
 
 func execEnv() string {
 	env := os.Getenv("AWS_EXECUTION_ENV")

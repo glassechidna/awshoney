@@ -21,8 +21,9 @@ func main() {
 	beeline.Init(beeline.Config{
 		WriteKey:    "yourkey",
 		Dataset:     "yourdataset",
-		PresendHook: awshoney.PresendHook,
 	})
+
+    awshoney.AddFieldsToClient(nil)
 }
 ```
 
