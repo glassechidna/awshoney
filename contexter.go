@@ -19,6 +19,4 @@ func contexter(ctx context.Context, request *awsctx.AwsRequest, inner func(ctx c
 	inner(ctx)
 }
 
-func Contexter() awsctx.Contexter {
-	return awsctx.ContexterFunc(contexter)
-}
+var Contexter = awsctx.ContexterFunc(contexter)

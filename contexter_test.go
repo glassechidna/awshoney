@@ -26,7 +26,7 @@ func (m *mocks3) PutObjectWithContext(ctx context.Context, input *s3.PutObjectIn
 
 func TestContexter(t *testing.T) {
 	api := &mocks3{}
-	ctxual := s3ctx.New(api, Contexter())
+	ctxual := s3ctx.New(api, Contexter)
 
 	api.
 		On("PutObjectWithContext", mock.Anything, &s3.PutObjectInput{Bucket: aws.String("bucket")}, mock.Anything).

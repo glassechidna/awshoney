@@ -19,7 +19,7 @@ func ExampleSqs() {
 	sess := session.Must(session.NewSession())
 	baseApi := sqs.New(sess)
 
-	api := sqsctx.New(baseApi, awshoney.Contexter())
+	api := sqsctx.New(baseApi, awshoney.Contexter)
 
 	// the other methods that aren't WithContext won't pass through
 	// the honeycomb trace id

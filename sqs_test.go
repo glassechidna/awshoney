@@ -24,7 +24,7 @@ func TestSqs_SendMessageWithContext(t *testing.T) {
 		assert.NotEmpty(t, *attrs.StringValue)
 	}).Return(nil, nil)
 
-	s := sqsctx.New(m, Contexter())
+	s := sqsctx.New(m, Contexter)
 	_, err := s.SendMessageWithContext(ctx, &sqs.SendMessageInput{})
 	assert.NoError(t, err)
 	m.AssertExpectations(t)
@@ -40,7 +40,7 @@ func TestSqs_SendMessageBatchWithContext(t *testing.T) {
 		assert.NotEmpty(t, *attrs.StringValue)
 	}).Return(nil, nil)
 
-	s := sqsctx.New(m, Contexter())
+	s := sqsctx.New(m, Contexter)
 	_, err := s.SendMessageBatchWithContext(ctx, &sqs.SendMessageBatchInput{
 		Entries: []*sqs.SendMessageBatchRequestEntry{
 			{},
@@ -111,7 +111,7 @@ func TestStartSpanFromSqs(t *testing.T) {
 				},
 			}, nil)
 
-		s := sqsctx.New(m, Contexter())
+		s := sqsctx.New(m, Contexter)
 		resp, err := s.ReceiveMessageWithContext(context.Background(), &sqs.ReceiveMessageInput{})
 		assert.NoError(t, err)
 
@@ -142,7 +142,7 @@ func TestStartSpanFromSqs(t *testing.T) {
 				},
 			}, nil)
 
-		s := sqsctx.New(m, Contexter())
+		s := sqsctx.New(m, Contexter)
 		resp, err := s.ReceiveMessageWithContext(ctx, &sqs.ReceiveMessageInput{})
 		assert.NoError(t, err)
 
