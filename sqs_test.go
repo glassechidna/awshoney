@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"github.com/glassechidna/awsctx/service/sqsctx"
 	"github.com/honeycombio/beeline-go"
 	"github.com/honeycombio/beeline-go/propagation"
 	"github.com/stretchr/testify/assert"
@@ -14,42 +15,32 @@ import (
 )
 
 func TestSqs_SendMessageWithContext(t *testing.T) {
-	ctx, span := beeline.StartSpan(context.Background(), "test")
+	ctx, _ := beeline.StartSpan(context.Background(), "test")
 
 	m := &mockSqs{}
-	m.On("SendMessageWithContext", mock.Anything, &sqs.SendMessageInput{
-		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"X-Honeycomb-Trace": {
-				DataType:    aws.String("String"),
-				StringValue: aws.String(span.SerializeHeaders()),
-			},
-		},
-	}, mock.AnythingOfType("[]request.Option")).Return(nil, nil)
+	m.On("SendMessageWithContext", mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		input := args.Get(1).(*sqs.SendMessageInput)
+		attrs := input.MessageAttributes[propagation.TracePropagationHTTPHeader]
+		assert.NotEmpty(t, *attrs.StringValue)
+	}).Return(nil, nil)
 
-	s := &Sqs{SQSAPI: m}
+	s := sqsctx.New(m, Contexter())
 	_, err := s.SendMessageWithContext(ctx, &sqs.SendMessageInput{})
 	assert.NoError(t, err)
 	m.AssertExpectations(t)
 }
 
 func TestSqs_SendMessageBatchWithContext(t *testing.T) {
-	ctx, span := beeline.StartSpan(context.Background(), "test")
+	ctx, _ := beeline.StartSpan(context.Background(), "test")
 
 	m := &mockSqs{}
-	m.On("SendMessageBatchWithContext", mock.Anything, &sqs.SendMessageBatchInput{
-		Entries: []*sqs.SendMessageBatchRequestEntry{
-			{
-				MessageAttributes: map[string]*sqs.MessageAttributeValue{
-					"X-Honeycomb-Trace": {
-						DataType:    aws.String("String"),
-						StringValue: aws.String(span.SerializeHeaders()),
-					},
-				},
-			},
-		},
-	}, mock.AnythingOfType("[]request.Option")).Return(nil, nil)
+	m.On("SendMessageBatchWithContext", mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		input := args.Get(1).(*sqs.SendMessageBatchInput)
+		attrs := input.Entries[0].MessageAttributes[propagation.TracePropagationHTTPHeader]
+		assert.NotEmpty(t, *attrs.StringValue)
+	}).Return(nil, nil)
 
-	s := &Sqs{SQSAPI: m}
+	s := sqsctx.New(m, Contexter())
 	_, err := s.SendMessageBatchWithContext(ctx, &sqs.SendMessageBatchInput{
 		Entries: []*sqs.SendMessageBatchRequestEntry{
 			{},
@@ -120,7 +111,7 @@ func TestStartSpanFromSqs(t *testing.T) {
 				},
 			}, nil)
 
-		s := &Sqs{SQSAPI: m}
+		s := sqsctx.New(m, Contexter())
 		resp, err := s.ReceiveMessageWithContext(context.Background(), &sqs.ReceiveMessageInput{})
 		assert.NoError(t, err)
 
@@ -151,7 +142,7 @@ func TestStartSpanFromSqs(t *testing.T) {
 				},
 			}, nil)
 
-		s := &Sqs{SQSAPI: m}
+		s := sqsctx.New(m, Contexter())
 		resp, err := s.ReceiveMessageWithContext(ctx, &sqs.ReceiveMessageInput{})
 		assert.NoError(t, err)
 

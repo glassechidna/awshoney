@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/glassechidna/awsctx/service/sqsctx"
 	"github.com/glassechidna/awshoney"
 	"github.com/honeycombio/beeline-go"
 	"github.com/honeycombio/beeline-go/propagation"
@@ -17,7 +18,8 @@ func ExampleSqs() {
 
 	sess := session.Must(session.NewSession())
 	baseApi := sqs.New(sess)
-	api := &awshoney.Sqs{SQSAPI: baseApi}
+
+	api := sqsctx.New(baseApi, awshoney.Contexter())
 
 	// the other methods that aren't WithContext won't pass through
 	// the honeycomb trace id
