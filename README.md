@@ -7,7 +7,7 @@ very helpful.
 
 [honeycombio]: https://honeycomb.io
 
-## Usage
+## Fields added to every trace
 
 ```go
 package main
@@ -56,7 +56,59 @@ map[string]string{
 }
 ```
 
+## Fields added to AWS API calls
+
+Calls to AWS APIs can be instrumented to automatically record spans, tagged with
+the AWS service and action called. That works as follows:
+
+```go
+package main
+
+import (
+	"context"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/glassechidna/awsctx/service/s3ctx"
+	"github.com/glassechidna/awshoney"
+	"github.com/honeycombio/beeline-go"
+)
+
+func main() {
+	// obviously it won't be too helpful if you do this. you'd want to
+	// pass in a context from a real span
+	ctx, _ := beeline.StartSpan(context.Background(), "example")
+
+	sess := session.Must(session.NewSession())
+	baseApi := s3.New(sess)
+
+	api := s3ctx.New(baseApi, awshoney.Contexter)
+
+	// the other methods that aren't WithContext won't pass through
+	// the honeycomb trace id
+	_, _ = api.ListObjectsWithContext(ctx, &s3.ListObjectsInput{
+		Bucket: aws.String("bucket-name"),
+	})
+
+	/*
+	The above will create a new span named `aws.api` with the following
+	span-level fields added:
+
+	map[string]string{
+		"aws.service": "s3",
+		"aws.action":  "ListObjects",
+	}
+	*/
+}
+
+```
+
+
 ## Bonus: SQS!
+
+If you use the `sqsctx.SQS` (as described above) when performing `SendMessageWithContext`
+or `SendMessageBatchWithContext` actions, messages will be annotated with the Honeycomb
+trace ID for cross-system tracing. On the "receiving end", you should do:
 
 Sometimes you want to "join up" a span that encompasses an SQS message being sent
 with the processing of said SQS message. You can do that like this:
@@ -70,45 +122,22 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/glassechidna/awshoney"
-	"github.com/honeycombio/beeline-go"
 	"github.com/honeycombio/beeline-go/propagation"
 )
 
 func main() {
-	// obviously it won't be too helpful if you do this. you'd want to
-	// pass in a context from a real span
-	ctx, _ := beeline.StartSpan(context.Background(), "example")
-
 	sess := session.Must(session.NewSession())
 	baseApi := sqs.New(sess)
-	api := &awshoney.Sqs{SQSAPI: baseApi}
 
-	// the other methods that aren't WithContext won't pass through
-	// the honeycomb trace id
-	_, _ = api.SendMessageWithContext(ctx, &sqs.SendMessageInput{
-		QueueUrl:    aws.String("queue-url"),
-		MessageBody: aws.String("body"),
-	})
-
-	// the other methods that aren't WithContext won't pass through
-	// the honeycomb trace id
-	_, _ = api.SendMessageBatchWithContext(ctx, &sqs.SendMessageBatchInput{
-		QueueUrl: aws.String("queue-url"),
-		Entries: []*sqs.SendMessageBatchRequestEntry{
-			{
-				MessageBody: aws.String("body"),
-			},
-		},
-	})
-
-	// you don't need to use the &awshoney.Sqs{} wrapper here (but it won't hurt)
+	// you don't need to use the sqsctx.SQS wrapper here (but it won't hurt)
 	resp, _ := baseApi.ReceiveMessage(&sqs.ReceiveMessageInput{
 		QueueUrl:              aws.String("queue-url"),
 		// by default sqs won't retrieve message attributes
 		MessageAttributeNames: []*string{aws.String(propagation.TracePropagationHTTPHeader)},
 	})
-	
+
 	msg := resp.Messages[0]
-	ctx, _ = awshoney.StartSpanFromSqs(context.Background(), msg)
+	ctx, _ := awshoney.StartSpanFromSqs(context.Background(), msg)
+    // do something with ctx
 }
 ```
