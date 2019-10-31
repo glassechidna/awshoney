@@ -1,16 +1,15 @@
 package awshoney
 
 import (
-	"github.com/honeycombio/beeline-go/client"
-	"github.com/honeycombio/libhoney-go"
 	"net/http"
 	"os"
-	"strings"
 	"time"
-)
 
-const execEnvEcs = "AWS_ECS_"
-const execEnvLambda = "AWS_Lambda_"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/honeycombio/beeline-go/client"
+	"github.com/honeycombio/libhoney-go"
+)
 
 // Adds aws.* fields to all traces and spans recorded by c. If c is nil,
 // the default client will be used. Usually you will invoke this right after
@@ -24,32 +23,35 @@ func AddFieldsToClient(c *libhoney.Client) {
 }
 
 func execEnv() string {
-	env := os.Getenv("AWS_EXECUTION_ENV")
-	if strings.HasPrefix(env, execEnvEcs) {
+	if os.Getenv("ECS_CONTAINER_METADATA_URI") != "" {
 		return "ecs"
-	} else if strings.HasPrefix(env, execEnvLambda) {
+	} else if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
 		return "lambda"
-	} else {
+	}
+	sess, err := session.NewSession()
+	if err != nil {
 		return "unknown"
 	}
+	metadata := ec2metadata.New(sess)
+	if metadata.Available() {
+		return "ec2"
+	}
+	return "unknown"
 }
 
 func Map() map[string]string {
-	m := map[string]string{}
+	var m map[string]string
 
 	env := execEnv()
+	switch env {
+	case "ecs":
+		m = ecsMap()
+	case "lambda":
+		m = lambdaMap()
+	case "ec2":
+		m = ec2Map()
+	}
 	m["aws.env"] = env
-
-	var envm map[string]string
-	if env == "ecs" {
-		envm = ecsMap()
-	} else if env == "lambda" {
-		envm = lambdaMap()
-	}
-
-	for k, v := range envm {
-		m[k] = v
-	}
 
 	return m
 }
