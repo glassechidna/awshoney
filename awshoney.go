@@ -30,21 +30,16 @@ func execEnv() string {
 }
 
 func Map() map[string]string {
-	m := map[string]string{}
+	var m map[string]string
 
 	env := execEnv()
+	switch env {
+	case "ecs":
+		m = ecsMap()
+	case "lambda":
+		m = lambdaMap()
+	}
 	m["aws.env"] = env
-
-	var envm map[string]string
-	if env == "ecs" {
-		envm = ecsMap()
-	} else if env == "lambda" {
-		envm = lambdaMap()
-	}
-
-	for k, v := range envm {
-		m[k] = v
-	}
 
 	return m
 }
