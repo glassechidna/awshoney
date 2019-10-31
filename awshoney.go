@@ -40,7 +40,7 @@ func execEnv() string {
 }
 
 func Map() map[string]string {
-	var m map[string]string
+	m := map[string]string{}
 
 	env := execEnv()
 	switch env {
