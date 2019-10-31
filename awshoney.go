@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/honeycombio/beeline-go/client"
 	"github.com/honeycombio/libhoney-go"
 )
@@ -26,6 +28,14 @@ func execEnv() string {
 	} else if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
 		return "lambda"
 	}
+	sess, err := session.NewSession()
+	if err != nil {
+		return "unknown"
+	}
+	metadata := ec2metadata.New(sess)
+	if metadata.Available() {
+		return "ec2"
+	}
 	return "unknown"
 }
 
@@ -38,6 +48,8 @@ func Map() map[string]string {
 		m = ecsMap()
 	case "lambda":
 		m = lambdaMap()
+	case "ec2":
+		m = ec2Map()
 	}
 	m["aws.env"] = env
 
