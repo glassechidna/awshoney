@@ -14,6 +14,15 @@ func lambdaMap() map[string]string {
 	m["aws.lambda.memory"] = os.Getenv("AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
 	m["aws.lambda.version"] = os.Getenv("AWS_LAMBDA_FUNCTION_VERSION")
 	m["aws.lambda.handler"] = os.Getenv("_HANDLER")
+	m["aws.lambda.execution-context"] = lambdaExecutionContext()
 
 	return m
+}
+
+func lambdaExecutionContext() string {
+	logStream := os.Getenv("AWS_LAMBDA_LOG_STREAM_NAME")
+	// format is YYYY/MM/DD/[($LATEST|\d+)].+
+
+	split := strings.Split(logStream, "]")
+	return split[1]
 }

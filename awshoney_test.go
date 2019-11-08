@@ -18,17 +18,19 @@ func TestMap_Lambda(t *testing.T) {
 		"AWS_LAMBDA_FUNCTION_NAME":        "name",
 		"AWS_LAMBDA_FUNCTION_MEMORY_SIZE": "memory",
 		"AWS_LAMBDA_FUNCTION_VERSION":     "version",
+		"AWS_LAMBDA_LOG_STREAM_NAME":      "2019/11/08/[4]9d4ee6310ced4ef48754dcfc55754f82",
 		"_HANDLER":                        "handler",
 	})()
 
 	assert.Equal(t, map[string]string{
-		"aws.env":            "lambda",
-		"aws.region":         "region",
-		"aws.lambda.handler": "handler",
-		"aws.lambda.name":    "name",
-		"aws.lambda.runtime": "runtime",
-		"aws.lambda.version": "version",
-		"aws.lambda.memory":  "memory",
+		"aws.env":                      "lambda",
+		"aws.region":                   "region",
+		"aws.lambda.handler":           "handler",
+		"aws.lambda.name":              "name",
+		"aws.lambda.runtime":           "runtime",
+		"aws.lambda.version":           "version",
+		"aws.lambda.memory":            "memory",
+		"aws.lambda.execution-context": "9d4ee6310ced4ef48754dcfc55754f82",
 	}, Map())
 }
 
