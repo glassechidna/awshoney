@@ -50,7 +50,7 @@ func (w *wrapper) Invoke(ctx context.Context, payload []byte) (output []byte, er
 //
 // In addition to starting a trace, additional fields are added to the root
 // span.
-// 
+//
 // It returns a lambda.Handler that can be passed to lambda.StartHandler().
 func WrapLambda(spanName string, inner interface{}) lambda.Handler {
 	if spanName == "" {
