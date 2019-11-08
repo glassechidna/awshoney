@@ -83,10 +83,10 @@
 //
 // Bonus SQS
 //
-//  If you use the `sqsctx.SQS` (as described above) when performing
-//  `SendMessageWithContext` or `SendMessageBatchWithContext` actions, messages
-//  will be annotated with the Honeycomb trace ID for cross-system tracing. On
-//  the "receiving end", you should do:
+// If you use the `sqsctx.SQS` (as described above) when performing
+// `SendMessageWithContext` or `SendMessageBatchWithContext` actions, messages
+// will be annotated with the Honeycomb trace ID for cross-system tracing. On
+// the "receiving end", you should do:
 //
 //  func main() {
 //    sess := session.Must(session.NewSession())
