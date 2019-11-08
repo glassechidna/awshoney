@@ -18,6 +18,7 @@ type wrapper struct {
 func (w *wrapper) Invoke(ctx context.Context, payload []byte) (output []byte, err error) {
 	ctx, span := beeline.StartSpan(ctx, w.spanName)
 	defer beeline.Flush(ctx)
+	defer span.Send()
 
 	span.AddField("aws.lambda.invocation-counter", w.counter)
 	w.counter++
