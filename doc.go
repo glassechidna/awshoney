@@ -55,8 +55,8 @@
 // the AWS service and action called. That works as follows:
 //
 //  func main() {
-//    //   obviously it won't be too helpful if you do this. you'd want to
-//    //   pass in a context from a real span
+//    // obviously it won't be too helpful if you do this. you'd want to
+//    // pass in a context from a real span
 //    ctx, _ := beeline.StartSpan(context.Background(), "example")
 //
 //    sess := session.Must(session.NewSession())
@@ -64,8 +64,8 @@
 //
 //    api := s3ctx.New(baseApi, awshoney.Contexter)
 //
-//    //   the other methods that aren't WithContext won't pass through
-//    //   the honeycomb trace id
+//    // the other methods that aren't WithContext won't pass through
+//    // the honeycomb trace id
 //    _, _ = api.ListObjectsWithContext(ctx, &s3.ListObjectsInput{
 //      Bucket: aws.String("bucket-name"),
 //    })
@@ -80,4 +80,28 @@
 //      }
 //    */
 //  }
+//
+//  Bonus SQS
+//
+//  If you use the `sqsctx.SQS` (as described above) when performing
+//  `SendMessageWithContext` or `SendMessageBatchWithContext` actions, messages
+//  will be annotated with the Honeycomb trace ID for cross-system tracing. On
+//  the "receiving end", you should do:
+//
+//  func main() {
+//    sess := session.Must(session.NewSession())
+//    baseApi := sqs.New(sess)
+//
+//    // you don't need to use the sqsctx.SQS wrapper here (but it won't hurt)
+//    resp, _ := baseApi.ReceiveMessage(&sqs.ReceiveMessageInput{
+//      QueueUrl:              aws.String("queue-url"),
+//      // by default sqs won't retrieve message attributes
+//      MessageAttributeNames: []*string{aws.String(propagation.TracePropagationHTTPHeader)},
+//    })
+//
+//    msg := resp.Messages[0]
+//    ctx, _ := awshoney.StartSpanFromSqs(context.Background(), msg)
+//    // do something with ctx
+//  }
+//  .
 package awshoney
