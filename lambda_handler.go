@@ -20,18 +20,18 @@ func (w *wrapper) Invoke(ctx context.Context, payload []byte) (output []byte, er
 	defer beeline.Flush(ctx)
 	defer span.Send()
 
-	span.AddField("aws.lambda.invocation-counter", w.counter)
+	span.AddTraceField("aws.lambda.invocation-counter", w.counter)
 	w.counter++
 
 	if !w.warm {
-		span.AddField("aws.lambda.cold-start", "true")
+		span.AddTraceField("aws.lambda.cold-start", "true")
 		w.warm = true
 	} else {
-		span.AddField("aws.lambda.cold-start", "false")
+		span.AddTraceField("aws.lambda.cold-start", "false")
 	}
 
 	if lctx, ok := lambdacontext.FromContext(ctx); ok {
-		span.AddField("aws.lambda.request-id", lctx.AwsRequestID)
+		span.AddTraceField("aws.lambda.request-id", lctx.AwsRequestID)
 
 		version := "$LATEST"
 		split := strings.Split(lctx.InvokedFunctionArn, ":")
@@ -39,7 +39,7 @@ func (w *wrapper) Invoke(ctx context.Context, payload []byte) (output []byte, er
 			version = split[7]
 		}
 
-		span.AddField("aws.lambda.invoked-version", version)
+		span.AddTraceField("aws.lambda.invoked-version", version)
 	}
 
 	return w.inner.Invoke(ctx, payload)
