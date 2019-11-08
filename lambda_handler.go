@@ -48,14 +48,9 @@ func (w *wrapper) Invoke(ctx context.Context, payload []byte) (output []byte, er
 // This inner handler can either be a plain function (i.e. one compatible
 // with lambda.Start()) or a type implementing the lambda.Handler interface.
 //
-// In addition to starting a trace, the following fields are added to the
-// root span:
-//
-//  * aws.lambda.cold-start: "true" or "false" (whether this invocation is a cold start)
-//  * aws.lambda.invocation-counter: integer (0 for a cold start, incrementing on each invocation in a warm container)
-//  * aws.lambda.request-id: string (the AWS-assigned GUID for this particular invocation. for correlation with CloudWatch)
-//  * aws.lambda.invoked-version: either "$LATEST", the alias or specific version used by the client
-//
+// In addition to starting a trace, additional fields are added to the root
+// span.
+// 
 // It returns a lambda.Handler that can be passed to lambda.StartHandler().
 func WrapLambda(spanName string, inner interface{}) lambda.Handler {
 	if spanName == "" {

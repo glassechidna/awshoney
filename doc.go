@@ -104,5 +104,4 @@
 //    ctx, _ := awshoney.StartSpanFromSqs(context.Background(), msg)
 //    // do something with ctx
 //  }
-//  .
 package awshoney
