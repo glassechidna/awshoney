@@ -9,22 +9,18 @@ import (
 	"strings"
 )
 
-type wrapper struct {
-	inner    lambda.Handler
-	spanName string
-	warm     bool
-	counter  int
+type LambdaWrapper struct {
+	TraceIdentifier func(ctx context.Context, payload []byte) string
+	inner           lambda.Handler
+	spanName        string
+	warm            bool
+	counter         int
 }
 
-func (w *wrapper) Invoke(ctx context.Context, payload []byte) (output []byte, err error) {
-	// a span might have already been created for us, in which case we're just adding
-	// useful fields to the trace
-	span := trace.GetSpanFromContext(ctx)
-	if span == nil {
-		ctx, span = beeline.StartSpan(ctx, w.spanName)
-		defer beeline.Flush(ctx)
-		defer span.Send()
-	}
+func (w *LambdaWrapper) Invoke(ctx context.Context, payload []byte) (output []byte, err error) {
+	ctx, span := w.startSpan(ctx, payload)
+	defer beeline.Flush(ctx)
+	defer span.Send()
 
 	span.AddTraceField("aws.lambda.invocation-counter", w.counter)
 	w.counter++
@@ -51,6 +47,23 @@ func (w *wrapper) Invoke(ctx context.Context, payload []byte) (output []byte, er
 	return w.inner.Invoke(ctx, payload)
 }
 
+func (w *LambdaWrapper) startSpan(ctx context.Context, payload []byte) (context.Context, *trace.Span) {
+	// a span might have already been created for us, in which case we're just adding
+	// useful fields to the trace
+	span := trace.GetSpanFromContext(ctx)
+	if span != nil {
+		return ctx, span
+	}
+
+	serialized := ""
+	if w.TraceIdentifier != nil {
+		serialized = w.TraceIdentifier(ctx, payload)
+	}
+
+	ctx, tr := trace.NewTrace(ctx, serialized)
+	return ctx, tr.GetRootSpan()
+}
+
 // WrapLambda takes a root span name and an "inner" lambda handler to wrap.
 // This inner handler can either be a plain function (i.e. one compatible
 // with lambda.Start()) or a type implementing the lambda.Handler interface.
@@ -59,7 +72,7 @@ func (w *wrapper) Invoke(ctx context.Context, payload []byte) (output []byte, er
 // way, the current or new span has additional Lambda fields added.
 //
 // It returns a lambda.Handler that can be passed to lambda.StartHandler().
-func WrapLambda(spanName string, inner interface{}) lambda.Handler {
+func WrapLambda(spanName string, inner interface{}) *LambdaWrapper {
 	if spanName == "" {
 		spanName = "lambda"
 	}
@@ -71,5 +84,5 @@ func WrapLambda(spanName string, inner interface{}) lambda.Handler {
 		innerH = lambda.NewHandler(inner)
 	}
 
-	return &wrapper{inner: innerH, spanName: spanName}
+	return &LambdaWrapper{inner: innerH, spanName: spanName}
 }
