@@ -19,6 +19,7 @@ type LambdaWrapper struct {
 
 func (w *LambdaWrapper) Invoke(ctx context.Context, payload []byte) (output []byte, err error) {
 	ctx, span := w.startSpan(ctx, payload)
+	span.AddField("name", "lambda")
 	defer beeline.Flush(ctx)
 	defer span.Send()
 
