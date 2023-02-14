@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/aws/aws-lambda-go v1.13.2
-	github.com/aws/aws-sdk-go v1.25.11
+	github.com/aws/aws-sdk-go v1.34.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a // indirect
 	github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51 // indirect
@@ -16,7 +16,7 @@ require (
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/honeycombio/beeline-go v0.4.4
 	github.com/honeycombio/libhoney-go v1.11.1
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect
